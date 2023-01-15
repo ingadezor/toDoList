@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const date = require(__dirname + "/date.js"); //accessing my own module
+
 
 let list=[];
 let workList = [];
@@ -15,9 +17,7 @@ app.use(express.static("public")); //letting know that our static files are in p
 
 //ROUTES
 app.get('/', function(req, res){
-    let today = new Date();
-    let options ={weekday: 'long', day: 'numeric', month: 'long'}
-    let day = today.toLocaleDateString('en-US', options);
+    let day = date.getDate();
 
     res.render('list', {title: day, list: list});
 
