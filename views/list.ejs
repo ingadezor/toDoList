@@ -8,14 +8,17 @@
         <!-- LIST-->
         <div class="box">
                 <%   for(let i=0; i<list.length; i++){   %>
-                    <div class="item"> 
-                        <input type="checkbox">
-                        <p> <%= list[i] %> </p>
-                    </div>
+                   
+                    <form action="/delete" method="POST"> <!-- route responsibile for deleting items from server-->
+                        <div class="item"> 
+                            <input type="checkbox" onChange = "this.form.submit()" name="checkbox" value=<%= list[i].name %>> <!-- will make checkbox work as a submit button and post info to /delete route-->
+                            <p> <%= list[i].name %> </p>
+                        </div>
+                    </form>
                 <%  }  %>
                 
                 
-                 <!--Posting new item entered bya user to server -->
+                 <!--routed responsible for adding new items to server; Posting new item entered bya user to server -->
                 <form class="item" action="/" method="POST">
                     <input type="text" name="listItem" value="" placeholder="New Item" autocomplete="off">
                     <button type="submit" name='button' value=<%= title %>>+</button>
