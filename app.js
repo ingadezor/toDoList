@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const date = require(__dirname + "/date.js"); //accessing my own module
 const mongoose = require('mongoose');
+const _ = require('lodash');
+
 
 
 
@@ -13,7 +15,6 @@ let itemSchema = new mongoose.Schema({
 })
 let Item = mongoose.model('Item', itemSchema); //model for Items collection
 //let WorkItem = mongoose.model('WorkItem', itemSchema);
-
 
 
 
@@ -30,18 +31,15 @@ let item2 = new Item({
 const defaultItems = [item1, item2];
 
 
-
-
-//
 const listSchema = new mongoose.Schema({
     name: String,  //list name
     items: [itemSchema]
 })
 const List = mongoose.model('List', listSchema);  //Lists collection
-
-
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
+
+
 
 
 
@@ -51,8 +49,6 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(express.static("public")); //letting know that our static files are in public folder
 
 
-
-//let day = date.getDate(); //using my owm module
 
 //ROUTES
 app.get('/', function(req, res){   //works with Items collection (which is Home to do list)
@@ -73,19 +69,10 @@ app.get('/', function(req, res){   //works with Items collection (which is Home 
 })
 
 
-// //work todolist
-// app.get('/work', function(req, res){
-
-//     WorkItem.find(function(err, workItems){
-//         res.render('list', {title: 'Work', list: workItems});
-//     })
-    
-// })
-
 
 
 app.get('/:customList', function(req, res){
-    let listTitle = req.params.customList;
+    let listTitle = _.capitalize(req.params.customList);
     
     //check if the list with such title already exists and show it
     List.findOne({name: listTitle}, function(err, foundList){ //foundList is a document
@@ -101,11 +88,6 @@ app.get('/:customList', function(req, res){
         } 
         else res.render('list', {title: listTitle, list: foundList.items})
     })
-
-
-
-
-   
 })
 
 
@@ -131,47 +113,29 @@ app.post("/", function(req, res){
             listObj.save();
             res.redirect('/' + listType);
         })
-    }
-
-
-    // if(listType == 'Work') {
-    //     //workList.push(listItem);
-    //     let item = new WorkItem({
-    //         name: listItem
-    //     })
-    //     item.save();
-
-
-    //     res.redirect('/work');
-    // }
-    // else{
-    //     //list.push(listItem);
-    //     //adding item to main list
-    //     let item = new Item({
-    //         name: listItem
-    //     })
-    //     item.save();
-
-    //     res.redirect('/');
-    // }
-    
+    }    
 })
 
 
 //deleting items from list
 app.post("/delete", function(req, res){
     let itemNameToDelete = req.body.checkbox;  //extracting an item to be deleted
-
-    Item.deleteOne({name: itemNameToDelete}, function(err){
-        console.log(err);
-    })
-
-    WorkItem.deleteOne({name: itemNameToDelete}, function(err){
-        console.log(err);
-    })
-
-    res.redirect('/');
+    let listType = req.body.listType;
+    
+    if(listType == 'Today'){
+        Item.deleteOne({name: itemNameToDelete}, function(err){ })
+        res.redirect('/');
+    }
+    else{
+        List.findOneAndUpdate({name: listType}, {$pull: {items:{name: itemNameToDelete}}}, function(err, listObj){
+             if(!err) res.redirect("/" + listType);
+        })
+    }
+    
 })
+
+
+
 
 
 
